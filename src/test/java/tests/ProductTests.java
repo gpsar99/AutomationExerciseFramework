@@ -6,90 +6,64 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+import pages.HomePage;
+import pages.ProductDetailsPage;
+import pages.ProductsPage;
 
 import java.util.List;
 
 public class ProductTests extends BaseTest {
 
-    @Test
+    @Test(description = "TC08 - Verify All Products and Product Detail Page")
     public void viewProductsTest(){
-        safeClick(By.xpath("//a[@href='/products']"));
-
+        HomePage homePage = new HomePage(driver);
+        homePage.clickProducts();
+        ProductsPage productsPage = new ProductsPage(driver);
         successfullyChangePage("https://automationexercise.com/products");
-
-        Assert.assertEquals(wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//h2[normalize-space()='All Products']"))).getText(),
-                "ALL PRODUCTS");
-
-        List<WebElement> products = wait.until(
-                ExpectedConditions.visibilityOfAllElementsLocatedBy(
-                        By.cssSelector(".features_items .product-image-wrapper")
-                )
-        );
-
-        Assert.assertFalse(products.isEmpty(), "Products list is empty");
-
-        safeClick(By.xpath("//a[@href='/product_details/1']"));
-        closeGoogleVignetteIfPresent();
-
-        successfullyChangePage("https://automationexercise.com/product_details/1");
-
-        //Label
-        Assert.assertTrue(wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//div[contains(@class,'product-information')]/h2")
-        )).isDisplayed());
-        //Category
-        Assert.assertTrue(wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//div[contains(@class,'product-information')]/p[1]")
-        )).isDisplayed());
-        //Price
-        Assert.assertTrue(wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//div[contains(@class,'product-information')]/span/span")
-        )).isDisplayed());
-        //Availability
-        Assert.assertTrue(wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//b[normalize-space()='Availability:']")
-        )).isDisplayed());
-        //Condition
-        Assert.assertTrue(wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//div[contains(@class,'product-information')]//b[normalize-space()='Condition:']")
-        )).isDisplayed());
-        //Brand
-        Assert.assertTrue(wait.until(ExpectedConditions.visibilityOfElementLocated(
-                By.xpath("//b[normalize-space()='Brand:']")
-        )).isDisplayed());
-
-
-    }
-    @Test
-    public void searchProduct(){
-        safeClick(By.xpath("//a[@href='/products']"));
-
-        successfullyChangePage("https://automationexercise.com/products");
-        closeGoogleVignetteIfPresent();
-        Assert.assertEquals(wait.until(ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath("//h2[normalize-space()='All Products']"))).getText(),
+        Assert.assertEquals(
+                productsPage.getAllProductsTitle(),
                 "ALL PRODUCTS"
         );
-
-        wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("search_product"))).sendKeys("Stylish Dress");
-        safeClick(By.id("submit_search"));
-
+        Assert.assertFalse(productsPage.getAllProducts().isEmpty(), "Products list is empty");
+        closeGoogleVignetteIfPresent();
+        productsPage.clickFirstProduct();
+        closeGoogleVignetteIfPresent();
+        successfullyChangePage("https://automationexercise.com/product_details/1");
+        ProductDetailsPage productDetailsPage = new ProductDetailsPage(driver);
+        //Label
+        Assert.assertTrue(productDetailsPage.isProductNameDisplayed() ,  "Product name is not displayed");
+        //Category
+        Assert.assertTrue(productDetailsPage.isProductCategoryDisplayed() ,  "Product Category is not displayed");
+        //Price
+        Assert.assertTrue(productDetailsPage.isProductPriceDisplayed(), "Product Price is not displayed");
+        //Availability
+        Assert.assertTrue(productDetailsPage.isProductAvailabilityDisplayed(), "Product Availability is not displayed");
+        //Condition
+        Assert.assertTrue(productDetailsPage.isProductConditionDisplayed(), "Product Condition is not displayed");
+        //Brand
+        Assert.assertTrue(productDetailsPage.isProductBrandDisplayed(), "Product Brand is not displayed");
+    }
+    @Test (description = "TC09 - Search Product")
+    public void searchProduct(){
+        HomePage homePage = new HomePage(driver);
+        homePage.clickProducts();
+        ProductsPage productsPage = new ProductsPage(driver);
+        successfullyChangePage("https://automationexercise.com/products");
+        closeGoogleVignetteIfPresent();
+        Assert.assertEquals(productsPage.getAllProductsTitle(),
+                "ALL PRODUCTS"
+        );
+        productsPage.searchProduct("Stylish Dress");
+        closeGoogleVignetteIfPresent();
         Assert.assertEquals(
-                wait.until(ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath("//h2[normalize-space()='Searched Products']")
-                )).getText(),
+                productsPage.getSearchedProductsTitle(),
                 "SEARCHED PRODUCTS"
         );
         Assert.assertTrue(
-                wait.until(ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath("//p[normalize-space()='Stylish Dress']")
-                )).isDisplayed(),
+                productsPage.isProductDisplayed("Stylish Dress"),
                 "Stylish Dress was not found in search results"
         );
     }
-
-
 
 
 }
