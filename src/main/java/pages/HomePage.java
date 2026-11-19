@@ -13,6 +13,9 @@ public class HomePage extends BasePage{
     private final By signUpLoginButton = By.cssSelector("a[href='/login']");
     private final By loggedInUser = By.xpath("//a[contains(normalize-space(.),'Logged in as')]");
     private final By deleteAccountLink = By.cssSelector("a[href='/delete_account']");
+    private final By logoutLink = By.cssSelector("a[href='/logout']");
+    private final By contactUsLink = By.cssSelector("a[href='/contact_us']");
+    private final By testCasesLink = By.cssSelector("a[href='/test_cases']");
     private final SubscriptionComponent subscription;
 
 
@@ -43,5 +46,14 @@ public class HomePage extends BasePage{
         wait.until(
                 ExpectedConditions.presenceOfElementLocated(deleteAccountLink)
         ).sendKeys(Keys.ENTER);
+    }
+    public void clickLogout() {
+        safeClick(logoutLink);
+    }
+    public void clickContactUs() {
+        safeClick(contactUsLink);
+    }
+    public void clickTestCases() {
+        safeClick(testCasesLink);
     }
 }

@@ -10,87 +10,74 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import base.BaseTest;
+import pages.HomePage;
+import pages.SignupLoginPage;
 import java.time.Duration;
 
 public class LoginTests extends BaseTest{
 
-    @Test
-    public void invalidLoginTest (){
-            //Click Login SignUp
-            wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@href='/login']"))).click();
 
-            driver.findElement(By.xpath("//input[@data-qa='login-email']")).sendKeys("invalid@example.com");
-            driver.findElement(By.xpath("//input[@data-qa='login-password']")).sendKeys("wrongPassword123");
-            driver.findElement(By.xpath("//button[@data-qa='login-button']")).click();
-            String errorMessage = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//p[contains(text(),'Your email or password is incorrect!')]"))).getText();
-            Assert.assertEquals("Your email or password is incorrect!", errorMessage);
-    }
-
-    @Test
+    @Test(description = "Test Case 2: Login User with correct email and password")
     public void loginWithValidCredentialsTest (){
-        //Click Login SignUp
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@href='/login']"))).click();
+        HomePage homePage = new HomePage(driver);
+        homePage.clickSignupLogin();
         String email = System.getenv("TEST_EMAIL");
         String password = System.getenv("TEST_PASSWORD");
         Assert.assertNotNull(email, "TEST_EMAIL is not configured");
         Assert.assertNotNull(password, "TEST_PASSWORD is not configured");
-
-        String loginTitle = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath("//h2[normalize-space()='Login to your account']")
-                )
-        ).getText();
-
-        Assert.assertEquals(loginTitle, "Login to your account");
-
-        driver.findElement(By.xpath("//input[@data-qa='login-email']")).sendKeys(email);
-        driver.findElement(By.xpath("//input[@data-qa='login-password']")).sendKeys(password);
-        driver.findElement(By.xpath("//button[@data-qa='login-button']")).click();
-
-        String loginAsUsername = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[.//i[contains(@class,'fa-user')]]"))).getText();
-        Assert.assertEquals(loginAsUsername,"Logged in as Georgios Psaroudis");
+        SignupLoginPage signupLoginPage = new SignupLoginPage(driver);
+        Assert.assertEquals(
+                signupLoginPage.getLoginTitle(),
+                "Login to your account"
+        );
+        signupLoginPage.login(email, password);
+        Assert.assertEquals(
+                homePage.getLoggedInUser(),
+                "Logged in as Georgios Psaroudis"
+        );
     }
 
+    @Test(description = "Test Case 3: Login User with incorrect email and password")
+    public void invalidLoginTest (){
+        HomePage homePage = new HomePage(driver);
+        homePage.clickSignupLogin();
+        SignupLoginPage signupLoginPage = new SignupLoginPage(driver);
+        signupLoginPage.login("invalid@example.com", "wrongPassword123");
+        Assert.assertEquals(
+                signupLoginPage.getInvalidLoginError(),
+                "Your email or password is incorrect!"
+        );
+    }
 
-    @Test
-    public void logoutUserTest(){
-        //Click Login SignUp
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@href='/login']"))).click();
-        //*[@id="form"]/div/div/div[1]/div/h2
+    @Test(description = "Test Case 4: Logout User")
+    public void logoutUserTest() {
+        HomePage homePage = new HomePage(driver);
+        homePage.clickSignupLogin();
         String email = System.getenv("TEST_EMAIL");
-        Assert.assertNotNull(email, "TEST_EMAIL is not configured");
-
         String password = System.getenv("TEST_PASSWORD");
+        Assert.assertNotNull(email, "TEST_EMAIL is not configured");
         Assert.assertNotNull(password, "TEST_PASSWORD is not configured");
-
-        String loginTitle = wait.until(
-                ExpectedConditions.visibilityOfElementLocated(
-                        By.xpath("//h2[normalize-space()='Login to your account']")
-                )
-        ).getText();
-
-        Assert.assertEquals(loginTitle, "Login to your account");
-
-        driver.findElement(By.xpath("//input[@data-qa='login-email']")).sendKeys(email);
-        driver.findElement(By.xpath("//input[@data-qa='login-password']")).sendKeys(password);
-        driver.findElement(By.xpath("//button[@data-qa='login-button']")).click();
-
-        String loginAsUsername = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//a[.//i[contains(@class,'fa-user')]]"))).getText();
-        Assert.assertEquals(loginAsUsername,"Logged in as Georgios Psaroudis");
-
-        // Click Logout
-        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//a[@href='/logout']"))).click();
-
-    // Verify redirection to Login page
-        wait.until(ExpectedConditions.urlToBe("https://automationexercise.com/login"));
-
-        Assert.assertEquals(                driver.getCurrentUrl(), "https://automationexercise.com/login");
-    // Verify Login form is displayed again
-        String loginTitleAfterLogout = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//h2[normalize-space()='Login to your account']"))).getText();
-
-        Assert.assertEquals(loginTitleAfterLogout, "Login to your account");
-
+        SignupLoginPage signupLoginPage = new SignupLoginPage(driver);
+        Assert.assertEquals(
+                signupLoginPage.getLoginTitle(),
+                "Login to your account"
+        );
+        signupLoginPage.login(email, password);
+        closeGoogleVignetteIfPresent();
+        Assert.assertEquals(
+                homePage.getLoggedInUser(),
+                "Logged in as Georgios Psaroudis"
+        );
+        homePage.clickLogout();
+        wait.until(ExpectedConditions.urlContains("/login"));
+        Assert.assertEquals(
+                driver.getCurrentUrl(),
+                "https://automationexercise.com/login"
+        );
+        Assert.assertEquals(
+                signupLoginPage.getLoginTitle(),
+                "Login to your account"
+        );
     }
-
 
 }
