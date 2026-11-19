@@ -22,6 +22,16 @@ public class CartPage extends BasePage{
             By.cssSelector("#cart_info_table tbody tr .cart_price p");
     private final By cartTotalPrices =
             By.cssSelector("#cart_info_table tbody tr .cart_total p");
+    private final By proceedToCheckOut =
+            By.xpath("//a[normalize-space()='Proceed To Checkout']");
+    private final By registerLoginButton =
+            By.cssSelector("#checkoutModal a[href='/login']");
+    private final By continueOnCartButton =
+            By.cssSelector("button.close-checkout-modal");
+    private final By checkoutModal =
+            By.id("checkoutModal");
+
+
 
     public CartPage(WebDriver driver){
         super(driver);
@@ -90,6 +100,27 @@ public class CartPage extends BasePage{
         ).getText().trim();
     }
 
+    public void clickproceedToCheckOut() {
+        safeClick(proceedToCheckOut);
+    }
 
+    public boolean isCheckoutModalVisible() {
+        return wait.until(
+                ExpectedConditions.visibilityOfElementLocated(
+                        checkoutModal
+                )
+        ).isDisplayed();
+    }
+
+    public void clickRegisterLoginButton() {
+        wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        registerLoginButton
+                )
+        ).click();
+    }
+    public void clickContinueOnCart(){
+        safeClick(continueOnCartButton);
+    }
 
 }

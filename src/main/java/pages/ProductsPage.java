@@ -7,6 +7,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import components.ProductCartComponent;
 
 public class ProductsPage extends BasePage {
 
@@ -17,13 +18,11 @@ public class ProductsPage extends BasePage {
     private final By searchedProductsTitle = By.xpath("//h2[normalize-space()='Searched Products']");
     private final By allProductsTitle = By.xpath("//h2[normalize-space()='All Products']");
     private final By allProducts = By.cssSelector(".features_items .product-image-wrapper");
-    private final By addFirstItemCartButton = By.xpath("//a[@data-product-id='1' and contains(@class,'add-to-cart')]");
-    private final By addSecondItemCartButton = By.xpath("//a[@data-product-id='2' and contains(@class,'add-to-cart')]");
-    private final By addContinueButton = By.xpath("//button[normalize-space()='Continue Shopping']");
-    private final By viewCartButton = By.xpath("//u[normalize-space()='View Cart']");
+    private final ProductCartComponent productCart;
 
     public ProductsPage(WebDriver driver) {
         super(driver);
+        productCart = new ProductCartComponent(driver);
     }
 
     public void searchProduct(String productName){
@@ -78,17 +77,20 @@ public class ProductsPage extends BasePage {
                         allProducts
                 ));
     }
-    public void addFirstItemToCart(){
-        safeClick(addFirstItemCartButton);
-    }
-    public void setAddContinue(){
-        safeClick(addContinueButton);
-    }
-    public void addSecondItemToCart(){
-        safeClick(addSecondItemCartButton);
-    }
-    public void viewCart(){
-        safeClick(viewCartButton);
+
+    public void addFirstItemToCart() {
+        productCart.addFirstItemToCart();
     }
 
+    public void setAddContinue() {
+        productCart.clickContinueShopping();
+    }
+
+    public void addSecondItemToCart() {
+        productCart.addSecondItemToCart();
+    }
+
+    public void viewCart() {
+        productCart.viewCart();
+    }
 }

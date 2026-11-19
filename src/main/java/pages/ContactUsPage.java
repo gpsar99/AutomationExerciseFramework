@@ -6,32 +6,15 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 
 public class ContactUsPage extends BasePage {
 
-    private final By getInTouchTitle =
-            By.xpath("//h2[normalize-space()='Get In Touch']");
-
-    private final By nameInput =
-            By.cssSelector("[data-qa='name']");
-
-    private final By emailInput =
-            By.cssSelector("[data-qa='email']");
-
-    private final By subjectInput =
-            By.cssSelector("[data-qa='subject']");
-
-    private final By messageInput =
-            By.cssSelector("[data-qa='message']");
-
-    private final By uploadFileInput =
-            By.name("upload_file");
-
-    private final By submitButton =
-            By.cssSelector("[data-qa='submit-button']");
-
-    private final By successMessage =
-            By.cssSelector("div.status.alert.alert-success");
-
-    private final By homeButton =
-            By.xpath("//span[normalize-space()='Home']");
+    private final By getInTouchTitle = By.xpath("//h2[normalize-space()='Get In Touch']");
+    private final By nameInput = By.cssSelector("[data-qa='name']");
+    private final By emailInput = By.cssSelector("[data-qa='email']");
+    private final By subjectInput = By.cssSelector("[data-qa='subject']");
+    private final By messageInput = By.cssSelector("[data-qa='message']");
+    private final By uploadFileInput = By.name("upload_file");
+    private final By submitButton = By.cssSelector("[data-qa='submit-button']");
+    private final By successMessage = By.cssSelector("div.status.alert.alert-success");
+    private final By homeButton = By.xpath("//span[normalize-space()='Home']");
 
     public ContactUsPage(WebDriver driver) {
         super(driver);
