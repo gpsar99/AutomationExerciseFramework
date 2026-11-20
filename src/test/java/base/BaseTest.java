@@ -1,6 +1,6 @@
 
 package base;
-
+import java.io.File;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -29,6 +29,12 @@ public class BaseTest {
         Map<String, Object> prefs = new HashMap<>();
         prefs.put("autofill.profile_enabled", false);
         prefs.put("autofill.credit_card_enabled", false);
+        //For Downloads
+        String downloadPath = System.getProperty("user.dir")
+                + File.separator + "downloads";
+        prefs.put("download.default_directory", downloadPath);
+        prefs.put("download.prompt_for_download", false);
+        prefs.put("download.directory_upgrade", true);
 
         options.setExperimentalOption("prefs", prefs);
 

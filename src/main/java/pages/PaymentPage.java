@@ -3,6 +3,10 @@ package pages;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.io.File;
+import java.time.Duration;
 
 public class PaymentPage extends BasePage {
 
@@ -12,6 +16,7 @@ public class PaymentPage extends BasePage {
     private final By expiryMonth = By.name("expiry_month");
     private final By expiryYear = By.name("expiry_year");
     private final By orderSuccessMessage = By.cssSelector("#form p");
+    private final By downloadInvoiceButton = By.cssSelector("a[href^='/download_invoice/']");
 
     private final By payButton =
             By.id("submit");
@@ -46,5 +51,30 @@ public class PaymentPage extends BasePage {
                         orderSuccessMessage
                 )
         ).getText();
+    }
+    public void clickDownloadInvoice() {
+        safeClick(downloadInvoiceButton);
+    }
+
+    public boolean isInvoiceDownloaded() {
+
+        String downloadPath = System.getProperty("user.dir")
+                + File.separator + "downloads";
+
+        File downloadFolder = new File(downloadPath);
+
+        WebDriverWait downloadWait =
+                new WebDriverWait(driver, Duration.ofSeconds(20));
+
+        return downloadWait.until(d -> {
+
+            File[] files = downloadFolder.listFiles(
+                    file -> file.isFile()
+                            && file.getName().startsWith("invoice")
+                            && file.getName().endsWith(".txt")
+            );
+
+            return files != null && files.length > 0;
+        });
     }
 }

@@ -20,6 +20,7 @@ public class ProductsPage extends BasePage {
     private final By allProducts = By.cssSelector(".features_items .product-image-wrapper");
     private final ProductCartComponent productCart;
 
+
     public ProductsPage(WebDriver driver) {
         super(driver);
         productCart = new ProductCartComponent(driver);
@@ -92,5 +93,12 @@ public class ProductsPage extends BasePage {
 
     public void viewCart() {
         productCart.viewCart();
+    }
+
+    public void addFirstSearchedProductToCart() {
+        productCart.addFirstSearchedProductToCart();
+    }
+    public void waitForProductAddedToCart() {
+        productCart.waitForProductAddedToCart();
     }
 }
