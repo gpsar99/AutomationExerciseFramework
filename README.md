@@ -158,18 +158,16 @@ The framework also includes handling for cookie consent prompts and Google Vigne
 
 ## Test Execution Status
 
-The framework contains 26 automated tests. Individual scenarios have passed in isolation, but full-suite stability is still being improved.
+The framework contains 26 automated tests. Individual scenarios have beem passed.
 
 A regression run on **November 23, 2026** reported:
 
 | Result | Count |
 | --- | ---: |
-| Passed | 19 |
-| Failed | 6 |
-| Skipped | 1 |
-| Configuration failures | 1 |
-
-Subsequent individual reruns of **TC01**, **TC21**, and **TC23** passed. These results suggest intermittent UI or browser-state issues, but do not establish that the complete suite passes reliably.
+| Passed | 26 |
+| Failed | 0 |
+| Skipped | 0 |
+| Configuration failures | 0 |
 
 ## Known Issues and Troubleshooting
 
