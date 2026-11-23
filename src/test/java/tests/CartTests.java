@@ -1,68 +1,140 @@
+
 package tests;
 
 import base.BaseTest;
-import org.openqa.selenium.WebDriver;
 import org.testng.Assert;
 import org.testng.annotations.Test;
-import pages.*;
+import pages.AccountInformationPage;
+import pages.AccountStatusPage;
+import pages.CartPage;
+import pages.CheckoutPage;
+import pages.HomePage;
+import pages.PaymentPage;
+import pages.ProductDetailsPage;
+import pages.ProductsPage;
+import pages.SignupLoginPage;
 
 import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Test class for shopping cart, checkout, payment,
+ * product quantity, address verification, and invoice download.
+ *
+ * Covers Automation Exercise test cases:
+ * TC12, TC13, TC14, TC15, TC16, TC17, TC22, TC23, and TC24.
+ */
 public class CartTests extends BaseTest {
 
+    private static final String BASE_URL =
+            "https://automationexercise.com/";
+
+    private static final String TEST_USER_NAME = "George";
+    private static final String TEST_PASSWORD = "TEvsivis@";
+
+    private static final String ORDER_COMMENT =
+            "Please deliver the order carefully.";
+
+    private static final String ORDER_SUCCESS_MESSAGE =
+            "Congratulations! Your order has been confirmed!";
+
+    /**
+     * TC12: Verifies that two products can be added to the cart.
+     *
+     * Checks product count, quantities, prices, and total prices.
+     */
     @Test(description = "Test Case 12: Add Products in Cart")
-    public void addProductInCart(){
+    public void addProductInCart() {
+
         HomePage homePage = new HomePage(driver);
         homePage.clickProducts();
-        ProductsPage productpage = new ProductsPage(driver);
+
+        ProductsPage productsPage = new ProductsPage(driver);
+
         closeGoogleVignetteIfPresent();
-        productpage.addFirstItemToCart();
-        productpage.setAddContinue();
-        productpage.addSecondItemToCart();
-        productpage.viewCart();
+
+        productsPage.addFirstItemToCart();
+        productsPage.setAddContinue();
+        productsPage.addSecondItemToCart();
+        productsPage.viewCart();
+
         CartPage cartPage = new CartPage(driver);
+
         closeGoogleVignetteIfPresent();
+
         Assert.assertEquals(
                 cartPage.getCartProductsCount(),
-                2);
+                2,
+                "The cart should contain two products"
+        );
+
         Assert.assertTrue(
                 cartPage.areAllQuantitiesOne(),
-                "All products should have quantity 1");
+                "All products should have quantity 1"
+        );
 
         List<String> prices = cartPage.getCartPrices();
 
-        Assert.assertEquals(prices.size(), 2);
+        Assert.assertEquals(
+                prices.size(),
+                2,
+                "Expected two product prices"
+        );
+
         Assert.assertEquals(prices.get(0), "Rs. 500");
         Assert.assertEquals(prices.get(1), "Rs. 400");
 
-        List<String> totalPrices = cartPage.getCartTotalPrices();
+        List<String> totalPrices =
+                cartPage.getCartTotalPrices();
 
-        Assert.assertEquals(totalPrices.size(), 2);
+        Assert.assertEquals(
+                totalPrices.size(),
+                2,
+                "Expected two product total prices"
+        );
+
         Assert.assertEquals(totalPrices.get(0), "Rs. 500");
         Assert.assertEquals(totalPrices.get(1), "Rs. 400");
     }
 
+    /**
+     * TC13: Verifies that the selected product quantity
+     * is correctly reflected in the shopping cart.
+     */
     @Test(description = "Test Case 13: Verify Product Quantity in Cart")
     public void verifyProductQuantityInCart() {
+
         HomePage homePage = new HomePage(driver);
         homePage.clickProducts();
+
         closeGoogleVignetteIfPresent();
+
         ProductsPage productsPage = new ProductsPage(driver);
+
         closeGoogleVignetteIfPresent();
+
         productsPage.clickFirstProduct();
+
         closeGoogleVignetteIfPresent();
-        ProductDetailsPage productDetailsPage = new ProductDetailsPage(driver);
+
+        ProductDetailsPage productDetailsPage =
+                new ProductDetailsPage(driver);
+
         closeGoogleVignetteIfPresent();
+
         productDetailsPage.setQuantity(5);
         productDetailsPage.addCart();
         productDetailsPage.viewCart();
+
         CartPage cartPage = new CartPage(driver);
+
         Assert.assertEquals(
                 cartPage.getCartProductsCount(),
                 1,
-                "Count Is Not The Same");
+                "The cart should contain one product"
+        );
+
         Assert.assertEquals(
                 cartPage.getFirstProductQuantity(),
                 "5",
@@ -70,6 +142,10 @@ public class CartTests extends BaseTest {
         );
     }
 
+    /**
+     * TC14: Verifies order placement when the user
+     * registers during the checkout process.
+     */
     @Test(description = "Test Case 14: Place Order - Register while Checkout")
     public void placeOrderRegisterWhileCheckoutTest() {
 
@@ -79,13 +155,17 @@ public class CartTests extends BaseTest {
                 driver.getCurrentUrl().contains("automationexercise.com"),
                 "Home page was not loaded"
         );
+
         homePage.addFirstItemToCart();
         homePage.viewCart();
+
         Assert.assertTrue(
-                driver.getCurrentUrl().contains("https://automationexercise.com/view_cart"),
-                "Home page was not loaded"
+                driver.getCurrentUrl().contains("/view_cart"),
+                "Cart page was not loaded"
         );
+
         CartPage cartPage = new CartPage(driver);
+
         closeGoogleVignetteIfPresent();
 
         cartPage.clickproceedToCheckOut();
@@ -96,19 +176,20 @@ public class CartTests extends BaseTest {
         );
 
         cartPage.clickRegisterLoginButton();
+
         Assert.assertTrue(
-                driver.getCurrentUrl().contains("https://automationexercise.com/login"),
-                "Home page was not loaded"
+                driver.getCurrentUrl().contains("/login"),
+                "Signup/Login page was not loaded"
         );
+
         closeGoogleVignetteIfPresent();
+
         SignupLoginPage signupLoginPage =
                 new SignupLoginPage(driver);
-        String uniqueEmail = "test_" +
-                UUID.randomUUID().toString().replace("-", "") +
-                "@gmail.com";
+
         signupLoginPage.signup(
-                "George",
-                uniqueEmail
+                TEST_USER_NAME,
+                generateUniqueEmail()
         );
 
         AccountInformationPage accountInformationPage =
@@ -119,7 +200,7 @@ public class CartTests extends BaseTest {
                 "ENTER ACCOUNT INFORMATION"
         );
 
-        accountInformationPage.enterPassword("TEvsivis@");
+        accountInformationPage.enterPassword(TEST_PASSWORD);
         accountInformationPage.fillAddressInformation();
         accountInformationPage.clickCreateAccount();
 
@@ -132,41 +213,37 @@ public class CartTests extends BaseTest {
         );
 
         accountStatusPage.clickContinue();
+
         closeGoogleVignetteIfPresent();
 
         Assert.assertEquals(
                 homePage.getLoggedInUser(),
                 "Logged in as George"
         );
+
         homePage.clickCart();
+
         closeGoogleVignetteIfPresent();
+
         cartPage.clickproceedToCheckOut();
+
         CheckoutPage checkoutPage = new CheckoutPage(driver);
-        Assert.assertEquals(
-                checkoutPage.getAddressDetailsTitle(),
-                "Address Details"
-        );
-        Assert.assertEquals(
-                checkoutPage.getReviewOrderTitle(),
-                "Review Your Order"
-        );
-        String deliveryAddress = checkoutPage.getDeliveryAddress();
-        String billingAddress = checkoutPage.getBillingAddress();
+
+        verifyCheckoutHeadings(checkoutPage);
 
         Assert.assertTrue(
-                deliveryAddress.contains("George"),
-                "Delivery address does not contain the expected name"
+                checkoutPage.getDeliveryAddress().contains("George"),
+                "Delivery address does not contain George"
         );
 
         Assert.assertTrue(
-                billingAddress.contains("George"),
-                "Billing address does not contain the expected name"
-        );
-        checkoutPage.enterOrderComment(
-                "Please deliver the order carefully."
+                checkoutPage.getBillingAddress().contains("George"),
+                "Billing address does not contain George"
         );
 
+        checkoutPage.enterOrderComment(ORDER_COMMENT);
         checkoutPage.clickPlaceOrder();
+
         closeGoogleVignetteIfPresent();
 
         Assert.assertTrue(
@@ -177,238 +254,277 @@ public class CartTests extends BaseTest {
 
         PaymentPage paymentPage = new PaymentPage(driver);
 
-        paymentPage.fillPaymentDetails(
-                "George",
-                "4111111111111111",
-                "123",
-                "12",
-                "2030"
-        );
+        completePayment(paymentPage);
 
-        paymentPage.clickPayAndConfirmOrder();
-        closeGoogleVignetteIfPresent();
-        Assert.assertEquals(
-                paymentPage.getOrderSuccessMessage(),
-                "Congratulations! Your order has been confirmed!"
-        );
         closeGoogleVignetteIfPresent();
 
-        homePage.clickDeleteAccount();
-
-        Assert.assertEquals(
-                accountStatusPage.getAccountDeletedMessage(),
-                "ACCOUNT DELETED!"
-        );
-
-        accountStatusPage.clickContinue();
-
-
+        deleteAccount(homePage, accountStatusPage);
     }
 
+    /**
+     * TC15: Verifies order placement when the user
+     * registers before adding products to the cart.
+     */
     @Test(description = "Test Case 15: Place Order: Register before Checkout")
     public void placeOrderRegisterBeforeCheckoutTest() {
+
         HomePage homePage = new HomePage(driver);
+
         Assert.assertEquals(
                 driver.getCurrentUrl(),
-                "https://automationexercise.com/"
+                BASE_URL
         );
+
         closeGoogleVignetteIfPresent();
+
         homePage.clickSignupLogin();
+
         Assert.assertTrue(
-                driver.getCurrentUrl().contains("/login")
+                driver.getCurrentUrl().contains("/login"),
+                "Signup/Login page was not loaded"
         );
-        String uniqueEmail = "test_" +
-                UUID.randomUUID().toString().replace("-", "") +
-                "@gmail.com";
-        SignupLoginPage signupLoginPage = new SignupLoginPage(driver);
-        signupLoginPage.signup("George", uniqueEmail);
-        AccountInformationPage accountInformationPage = new AccountInformationPage(driver);
+
+        SignupLoginPage signupLoginPage =
+                new SignupLoginPage(driver);
+
+        signupLoginPage.signup(
+                TEST_USER_NAME,
+                generateUniqueEmail()
+        );
+
+        AccountInformationPage accountInformationPage =
+                new AccountInformationPage(driver);
+
         Assert.assertEquals(
                 accountInformationPage.getAccountInformationTitle(),
                 "ENTER ACCOUNT INFORMATION"
         );
-        accountInformationPage.enterPassword("TEvsivis@");
+
+        accountInformationPage.enterPassword(TEST_PASSWORD);
         accountInformationPage.fillAddressInformation();
         accountInformationPage.clickCreateAccount();
-        AccountStatusPage accountStatusPage = new AccountStatusPage(driver);
-        Assert.assertEquals(
-                accountStatusPage.getAccountCreatedMessage(),
-                "ACCOUNT CREATED!"
-        );
-        accountStatusPage.clickContinue();
-        closeGoogleVignetteIfPresent();
-        Assert.assertTrue(
-                homePage.getLoggedInUser().contains("George")
-        );
-        homePage.addFirstItemToCart();
-        homePage.viewCart();
-        Assert.assertTrue(
-                driver.getCurrentUrl().contains("/view_cart")
-        );
-        closeGoogleVignetteIfPresent();
-        CartPage cartPage = new CartPage(driver);
-        cartPage.clickproceedToCheckOut();
-        CheckoutPage checkoutPage = new CheckoutPage(driver);
-        Assert.assertEquals(
-                checkoutPage.getAddressDetailsTitle(),
-                "Address Details"
-        );
-        Assert.assertEquals(
-                checkoutPage.getReviewOrderTitle(),
-                "Review Your Order"
-        );
-        Assert.assertTrue(
-                checkoutPage.getDeliveryAddress().contains("George")
-        );
-        Assert.assertTrue(
-                checkoutPage.getBillingAddress().contains("George")
-        );
-        checkoutPage.enterOrderComment(
-                "Please deliver the order carefully."
-        );
-        checkoutPage.clickPlaceOrder();
-        closeGoogleVignetteIfPresent();
-        Assert.assertTrue(
-                driver.getCurrentUrl().contains("/payment")
-        );
-        PaymentPage paymentPage = new PaymentPage(driver);
-        paymentPage.fillPaymentDetails(
-                "George",
-                "4111111111111111",
-                "123",
-                "12",
-                "2030"
-        );
-        paymentPage.clickPayAndConfirmOrder();
 
-        closeGoogleVignetteIfPresent();
-        Assert.assertEquals(
-                paymentPage.getOrderSuccessMessage(),
-                "Congratulations! Your order has been confirmed!"
-        );
-        closeGoogleVignetteIfPresent();
-        homePage.clickDeleteAccount();
-        Assert.assertEquals(
-                accountStatusPage.getAccountDeletedMessage(),
-                "ACCOUNT DELETED!"
-        );
-        accountStatusPage.clickContinue();
-    }
-
-    @Test(description = "Test Case 16: Place Order: Login before Checkout")
-    public void placeOrderLoginBeforeCheckoutTest() {
-
-        HomePage homePage = new HomePage(driver);
-        Assert.assertEquals(
-                driver.getCurrentUrl(),
-                "https://automationexercise.com/"
-        );
-        closeGoogleVignetteIfPresent();
-        homePage.clickSignupLogin();
-        Assert.assertTrue(
-                driver.getCurrentUrl().contains("/login")
-        );
-        SignupLoginPage signupLoginPage =
-                new SignupLoginPage(driver);
-        signupLoginPage.login(
-                System.getenv("TEST_EMAIL"),
-                System.getenv("TEST_PASSWORD")
-        );
-        closeGoogleVignetteIfPresent();
-        Assert.assertTrue(
-                homePage.getLoggedInUser().contains("Georgios"),
-                "User is not logged in as George"
-        );
-        homePage.addFirstItemToCart();
-        homePage.viewCart();
-        Assert.assertTrue(
-                driver.getCurrentUrl().contains("/view_cart")
-        );
-        closeGoogleVignetteIfPresent();
-        CartPage cartPage = new CartPage(driver);
-        cartPage.clickproceedToCheckOut();
-        CheckoutPage checkoutPage =
-                new CheckoutPage(driver);
-        Assert.assertEquals(
-                checkoutPage.getAddressDetailsTitle(),
-                "Address Details"
-        );
-        Assert.assertEquals(
-                checkoutPage.getReviewOrderTitle(),
-                "Review Your Order"
-        );
-        Assert.assertTrue(
-                checkoutPage.getDeliveryAddress().contains("GEORGIOS")
-        );
-        Assert.assertTrue(
-                checkoutPage.getBillingAddress().contains("GEORGIOS")
-        );
-        checkoutPage.enterOrderComment(
-                "Please deliver the order carefully."
-        );
-        checkoutPage.clickPlaceOrder();
-        closeGoogleVignetteIfPresent();
-        Assert.assertTrue(
-                driver.getCurrentUrl().contains("/payment")
-        );
-        PaymentPage paymentPage =
-                new PaymentPage(driver);
-        paymentPage.fillPaymentDetails(
-                "George",
-                "4111111111111111",
-                "123",
-                "12",
-                "2030"
-        );
-        paymentPage.clickPayAndConfirmOrder();
-        closeGoogleVignetteIfPresent();
-        Assert.assertEquals(
-                paymentPage.getOrderSuccessMessage(),
-                "Congratulations! Your order has been confirmed!"
-        );
-        closeGoogleVignetteIfPresent();
-        homePage.clickDeleteAccount();
         AccountStatusPage accountStatusPage =
                 new AccountStatusPage(driver);
 
         Assert.assertEquals(
-                accountStatusPage.getAccountDeletedMessage(),
-                "ACCOUNT DELETED!"
+                accountStatusPage.getAccountCreatedMessage(),
+                "ACCOUNT CREATED!"
         );
-        accountStatusPage.clickContinue();
-    }
 
-    @Test(description = "Test Case 17: Remove Products From Cart")
-    public void removeProductsFromCartTest(){
-        HomePage homePage = new HomePage(driver);
+        accountStatusPage.clickContinue();
+
+        closeGoogleVignetteIfPresent();
+
+        Assert.assertTrue(
+                homePage.getLoggedInUser().contains("George"),
+                "User is not logged in as George"
+        );
+
         homePage.addFirstItemToCart();
         homePage.viewCart();
-        CartPage cartPage = new CartPage(driver);
-        Assert.assertEquals(
-                cartPage.getCartProductsCount(),
-                1);
+
+        Assert.assertTrue(
+                driver.getCurrentUrl().contains("/view_cart"),
+                "Cart page was not loaded"
+        );
+
         closeGoogleVignetteIfPresent();
-        cartPage.removeFirstProductsFromCart();
+
+        CartPage cartPage = new CartPage(driver);
+        cartPage.clickproceedToCheckOut();
+
+        CheckoutPage checkoutPage = new CheckoutPage(driver);
+
+        verifyCheckoutHeadings(checkoutPage);
+
+        Assert.assertTrue(
+                checkoutPage.getDeliveryAddress().contains("George"),
+                "Delivery address does not contain George"
+        );
+
+        Assert.assertTrue(
+                checkoutPage.getBillingAddress().contains("George"),
+                "Billing address does not contain George"
+        );
+
+        checkoutPage.enterOrderComment(ORDER_COMMENT);
+        checkoutPage.clickPlaceOrder();
+
+        closeGoogleVignetteIfPresent();
+
+        Assert.assertTrue(
+                driver.getCurrentUrl().contains("/payment"),
+                "Payment page was not loaded"
+        );
+
+        PaymentPage paymentPage = new PaymentPage(driver);
+
+        completePayment(paymentPage);
+
+        closeGoogleVignetteIfPresent();
+
+        deleteAccount(homePage, accountStatusPage);
+    }
+
+
+    /**
+     * TC16: Verifies order placement after logging in
+     * with an existing registered account.
+     *
+     * Requires TEST_EMAIL and TEST_PASSWORD environment variables.
+     *
+     * The shared test account is preserved for other test cases.
+     */
+    @Test(description = "Test Case 16: Place Order: Login before Checkout")
+    public void placeOrderLoginBeforeCheckoutTest() {
+
+        HomePage homePage = new HomePage(driver);
+
+        Assert.assertEquals(
+                driver.getCurrentUrl(),
+                BASE_URL
+        );
+
+        closeGoogleVignetteIfPresent();
+
+        homePage.clickSignupLogin();
+
+        Assert.assertTrue(
+                driver.getCurrentUrl().contains("/login"),
+                "Login page was not loaded"
+        );
+
+        String email = System.getenv("TEST_EMAIL");
+        String password = System.getenv("TEST_PASSWORD");
+
+        Assert.assertNotNull(
+                email,
+                "TEST_EMAIL environment variable is missing"
+        );
+
+        Assert.assertNotNull(
+                password,
+                "TEST_PASSWORD environment variable is missing"
+        );
+
+        SignupLoginPage signupLoginPage =
+                new SignupLoginPage(driver);
+
+        signupLoginPage.login(email, password);
+
+        closeGoogleVignetteIfPresent();
+
+        Assert.assertTrue(
+                homePage.getLoggedInUser().contains("Georgios"),
+                "User is not logged in as Georgios"
+        );
+
+        homePage.addFirstItemToCart();
+        closeGoogleVignetteIfPresent();
+        homePage.viewCart();
+
+        Assert.assertTrue(
+                driver.getCurrentUrl().contains("/view_cart"),
+                "Cart page was not loaded"
+        );
+
+        closeGoogleVignetteIfPresent();
+
+        CartPage cartPage = new CartPage(driver);
+        cartPage.clickproceedToCheckOut();
+
+        CheckoutPage checkoutPage = new CheckoutPage(driver);
+
+        verifyCheckoutHeadings(checkoutPage);
+
+        Assert.assertTrue(
+                checkoutPage.getDeliveryAddress().contains("GEORGIOS"),
+                "Delivery address does not contain GEORGIOS"
+        );
+
+        Assert.assertTrue(
+                checkoutPage.getBillingAddress().contains("GEORGIOS"),
+                "Billing address does not contain GEORGIOS"
+        );
+
+        checkoutPage.enterOrderComment(ORDER_COMMENT);
+        checkoutPage.clickPlaceOrder();
+
+        closeGoogleVignetteIfPresent();
+
+        Assert.assertTrue(
+                driver.getCurrentUrl().contains("/payment"),
+                "Payment page was not loaded"
+        );
+
+        PaymentPage paymentPage = new PaymentPage(driver);
+
+        completePayment(paymentPage);
+
+        closeGoogleVignetteIfPresent();
+
+        // Preserve the shared account for other regression tests.
+    }
+
+
+    /**
+     * TC17: Verifies that a product can be removed
+     * from the shopping cart.
+     */
+    @Test(description = "Test Case 17: Remove Products From Cart")
+    public void removeProductsFromCartTest() {
+
+        HomePage homePage = new HomePage(driver);
+
+        homePage.addFirstItemToCart();
+        homePage.viewCart();
+
+        CartPage cartPage = new CartPage(driver);
+
         Assert.assertEquals(
                 cartPage.getCartProductsCount(),
-                0
+                1,
+                "The cart should initially contain one product"
+        );
+
+        closeGoogleVignetteIfPresent();
+
+        cartPage.removeFirstProductsFromCart();
+
+        Assert.assertEquals(
+                cartPage.getCartProductsCount(),
+                0,
+                "The cart should be empty after removing the product"
         );
     }
 
+    /**
+     * TC22: Verifies that a recommended product
+     * can be added to the shopping cart.
+     */
     @Test(description = "Test Case 22: Add to Cart from Recommended Items")
     public void addToCartFromRecommendedItemsTest() {
+
         HomePage homePage = new HomePage(driver);
+
         Assert.assertTrue(
                 homePage.isRecommendedItemsVisible(),
                 "Recommended Items section is not visible"
         );
+
         String recommendedProductName =
                 homePage.getFirstRecommendedProductName();
+
         closeGoogleVignetteIfPresent();
+
         homePage.addFirstRecommendedProductToCart();
         homePage.clickViewCartFromModal();
+
         closeGoogleVignetteIfPresent();
+
         CartPage cartPage = new CartPage(driver);
+
         Assert.assertTrue(
                 cartPage.getCartProductNames()
                         .contains(recommendedProductName),
@@ -417,56 +533,82 @@ public class CartTests extends BaseTest {
         );
     }
 
+    /**
+     * TC23: Verifies that delivery and billing addresses
+     * match the address information entered during signup.
+     */
     @Test(description = "Test Case 23: Verify Address Details in Checkout")
     public void verifyAddressDetailsInCheckoutTest() {
 
         HomePage homePage = new HomePage(driver);
+
         Assert.assertEquals(
                 driver.getCurrentUrl(),
-                "https://automationexercise.com/"
+                BASE_URL
         );
+
         closeGoogleVignetteIfPresent();
+
         homePage.clickSignupLogin();
-        String uniqueEmail = "test_" +
-                UUID.randomUUID().toString().replace("-", "") +
-                "@gmail.com";
+
         SignupLoginPage signupLoginPage =
                 new SignupLoginPage(driver);
-        signupLoginPage.signup("George", uniqueEmail);
+
+        signupLoginPage.signup(
+                TEST_USER_NAME,
+                generateUniqueEmail()
+        );
+
         AccountInformationPage accountInformationPage =
                 new AccountInformationPage(driver);
+
         Assert.assertEquals(
                 accountInformationPage.getAccountInformationTitle(),
                 "ENTER ACCOUNT INFORMATION"
         );
-        accountInformationPage.enterPassword("TEvsivis@");
+
+        accountInformationPage.enterPassword(TEST_PASSWORD);
         accountInformationPage.fillAddressInformation();
         accountInformationPage.clickCreateAccount();
+
         AccountStatusPage accountStatusPage =
                 new AccountStatusPage(driver);
+
         Assert.assertEquals(
                 accountStatusPage.getAccountCreatedMessage(),
                 "ACCOUNT CREATED!"
         );
+
         accountStatusPage.clickContinue();
+
         closeGoogleVignetteIfPresent();
+
         Assert.assertTrue(
-                homePage.getLoggedInUser().contains("George")
+                homePage.getLoggedInUser().contains("George"),
+                "User is not logged in as George"
         );
+
         homePage.addFirstItemToCart();
         homePage.viewCart();
+
         closeGoogleVignetteIfPresent();
+
         CartPage cartPage = new CartPage(driver);
         cartPage.clickproceedToCheckOut();
+
         CheckoutPage checkoutPage = new CheckoutPage(driver);
+
         Assert.assertEquals(
                 checkoutPage.getAddressDetailsTitle(),
                 "Address Details"
         );
+
         String deliveryAddress =
                 checkoutPage.getDeliveryAddress();
+
         String billingAddress =
                 checkoutPage.getBillingAddress();
+
         String[] expectedAddressDetails = {
                 "George",
                 "Papadopoulos",
@@ -478,6 +620,7 @@ public class CartTests extends BaseTest {
                 "Los Angeles",
                 "90001"
         };
+
         for (String expectedDetail : expectedAddressDetails) {
 
             Assert.assertTrue(
@@ -490,11 +633,15 @@ public class CartTests extends BaseTest {
                     "Billing Address missing: " + expectedDetail
             );
         }
+
         System.out.println(
                 "Delivery and Billing Address verified successfully."
         );
+
         homePage.clickDeleteAccount();
+
         closeGoogleVignetteIfPresent();
+
         Assert.assertEquals(
                 accountStatusPage.getAccountDeletedMessage(),
                 "ACCOUNT DELETED!"
@@ -503,6 +650,10 @@ public class CartTests extends BaseTest {
         accountStatusPage.clickContinue();
     }
 
+    /**
+     * TC24: Verifies that an invoice can be downloaded
+     * after successfully placing an order.
+     */
     @Test(description = "Test Case 24: Download Invoice after Purchase Order")
     public void downloadInvoiceAfterPurchaseOrderTest() {
 
@@ -510,13 +661,182 @@ public class CartTests extends BaseTest {
 
         Assert.assertEquals(
                 driver.getCurrentUrl(),
-                "https://automationexercise.com/"
+                BASE_URL
         );
 
-        // Clear previous invoice files
+        // Remove old invoice files before the test.
+        clearPreviousInvoices();
+
+        closeGoogleVignetteIfPresent();
+
+        homePage.addFirstItemToCart();
+        homePage.viewCart();
+
+        closeGoogleVignetteIfPresent();
+
+        CartPage cartPage = new CartPage(driver);
+
+        cartPage.clickproceedToCheckOut();
+        cartPage.clickRegisterLoginFromCheckoutModal();
+
+        Assert.assertTrue(
+                driver.getCurrentUrl().contains("/login"),
+                "Login page was not opened"
+        );
+
+        SignupLoginPage signupLoginPage =
+                new SignupLoginPage(driver);
+
+        signupLoginPage.signup(
+                TEST_USER_NAME,
+                generateUniqueEmail()
+        );
+
+        AccountInformationPage accountInformationPage =
+                new AccountInformationPage(driver);
+
+        accountInformationPage.enterPassword(TEST_PASSWORD);
+        accountInformationPage.fillAddressInformation();
+        accountInformationPage.clickCreateAccount();
+
+        AccountStatusPage accountStatusPage =
+                new AccountStatusPage(driver);
+
+        Assert.assertEquals(
+                accountStatusPage.getAccountCreatedMessage(),
+                "ACCOUNT CREATED!"
+        );
+
+        accountStatusPage.clickContinue();
+
+        closeGoogleVignetteIfPresent();
+
+        homePage.clickCart();
+
+        closeGoogleVignetteIfPresent();
+
+        cartPage.clickproceedToCheckOut();
+
+        CheckoutPage checkoutPage = new CheckoutPage(driver);
+
+        Assert.assertEquals(
+                checkoutPage.getAddressDetailsTitle(),
+                "Address Details"
+        );
+
+        checkoutPage.enterOrderComment(ORDER_COMMENT);
+        checkoutPage.clickPlaceOrder();
+
+        closeGoogleVignetteIfPresent();
+
+        PaymentPage paymentPage = new PaymentPage(driver);
+
+        completePayment(paymentPage);
+
+        closeGoogleVignetteIfPresent();
+
+        paymentPage.clickDownloadInvoice();
+
+        Assert.assertTrue(
+                paymentPage.isInvoiceDownloaded(),
+                "Invoice was not downloaded successfully"
+        );
+
+        System.out.println("Invoice downloaded successfully!");
+
+        closeGoogleVignetteIfPresent();
+
+        deleteAccount(homePage, accountStatusPage);
+    }
+
+    /**
+     * Generates a unique email address for test registration.
+     *
+     * @return a randomly generated test email address
+     */
+    private String generateUniqueEmail() {
+        return "test_"
+                + UUID.randomUUID().toString().replace("-", "")
+                + "@gmail.com";
+    }
+
+    /**
+     * Verifies the Address Details and Review Your Order
+     * headings on the checkout page.
+     *
+     * @param checkoutPage the Checkout Page Object
+     */
+    private void verifyCheckoutHeadings(CheckoutPage checkoutPage) {
+
+        Assert.assertEquals(
+                checkoutPage.getAddressDetailsTitle(),
+                "Address Details"
+        );
+
+        Assert.assertEquals(
+                checkoutPage.getReviewOrderTitle(),
+                "Review Your Order"
+        );
+    }
+
+    /**
+     * Enters test payment information, submits the order,
+     * and verifies the order confirmation message.
+     *
+     * @param paymentPage the Payment Page Object
+     */
+    private void completePayment(PaymentPage paymentPage) {
+
+        paymentPage.fillPaymentDetails(
+                "George",
+                "4111111111111111",
+                "123",
+                "12",
+                "2030"
+        );
+
+        paymentPage.clickPayAndConfirmOrder();
+
+        closeGoogleVignetteIfPresent();
+
+        Assert.assertEquals(
+                paymentPage.getOrderSuccessMessage(),
+                ORDER_SUCCESS_MESSAGE,
+                "Order confirmation message is incorrect"
+        );
+    }
+
+    /**
+     * Deletes the registered test account and verifies
+     * the account deletion confirmation.
+     *
+     * @param homePage the Home Page Object
+     * @param accountStatusPage the Account Status Page Object
+     */
+    private void deleteAccount(
+            HomePage homePage,
+            AccountStatusPage accountStatusPage
+    ) {
+
+        homePage.clickDeleteAccount();
+
+        Assert.assertEquals(
+                accountStatusPage.getAccountDeletedMessage(),
+                "ACCOUNT DELETED!"
+        );
+
+        accountStatusPage.clickContinue();
+    }
+
+    /**
+     * Deletes previously downloaded invoice text files
+     * to avoid false positives during invoice verification.
+     */
+    private void clearPreviousInvoices() {
+
         File downloadFolder = new File(
-                System.getProperty("user.dir")
-                        + File.separator + "downloads"
+                System.getProperty("user.dir"),
+                "downloads"
         );
 
         File[] oldInvoices = downloadFolder.listFiles(
@@ -527,86 +847,13 @@ public class CartTests extends BaseTest {
 
         if (oldInvoices != null) {
             for (File invoice : oldInvoices) {
+
                 Assert.assertTrue(
                         invoice.delete(),
-                        "Could not delete old invoice: " + invoice.getName()
+                        "Could not delete old invoice: "
+                                + invoice.getName()
                 );
             }
         }
-        closeGoogleVignetteIfPresent();
-        homePage.addFirstItemToCart();
-        homePage.viewCart();
-
-        closeGoogleVignetteIfPresent();
-
-        CartPage cartPage = new CartPage(driver);
-        cartPage.clickproceedToCheckOut();
-        cartPage.clickRegisterLoginFromCheckoutModal();
-        Assert.assertTrue(
-                driver.getCurrentUrl().contains("/login"),
-                "Login page was not opened"
-        );
-        String uniqueEmail = "test_" +
-                UUID.randomUUID().toString().replace("-", "") +
-                "@gmail.com";
-
-        SignupLoginPage signupLoginPage = new SignupLoginPage(driver);
-        signupLoginPage.signup("George", uniqueEmail);
-
-        AccountInformationPage accountInformationPage =
-                new AccountInformationPage(driver);
-        accountInformationPage.enterPassword("TEvsivis@");
-        accountInformationPage.fillAddressInformation();
-        accountInformationPage.clickCreateAccount();
-        AccountStatusPage accountStatusPage =
-                new AccountStatusPage(driver);
-        Assert.assertEquals(
-                accountStatusPage.getAccountCreatedMessage(),
-                "ACCOUNT CREATED!"
-        );
-        accountStatusPage.clickContinue();
-        closeGoogleVignetteIfPresent();
-        homePage.clickCart();
-        closeGoogleVignetteIfPresent();
-        cartPage.clickproceedToCheckOut();
-        CheckoutPage checkoutPage = new CheckoutPage(driver);
-        Assert.assertEquals(
-                checkoutPage.getAddressDetailsTitle(),
-                "Address Details"
-        );
-        checkoutPage.enterOrderComment(
-                "Please deliver the order carefully."
-        );
-        checkoutPage.clickPlaceOrder();
-        closeGoogleVignetteIfPresent();
-        PaymentPage paymentPage = new PaymentPage(driver);
-        paymentPage.fillPaymentDetails(
-                "George",
-                "4111111111111111",
-                "123",
-                "12",
-                "2030"
-        );
-
-        paymentPage.clickPayAndConfirmOrder();
-        Assert.assertEquals(
-                paymentPage.getOrderSuccessMessage(),
-                "Congratulations! Your order has been confirmed!"
-        );
-        closeGoogleVignetteIfPresent();
-        paymentPage.clickDownloadInvoice();
-        Assert.assertTrue(
-                paymentPage.isInvoiceDownloaded(),
-                "Invoice was not downloaded successfully"
-        );
-        System.out.println("Invoice downloaded successfully!");
-        closeGoogleVignetteIfPresent();
-        homePage.clickDeleteAccount();
-        Assert.assertEquals(
-                accountStatusPage.getAccountDeletedMessage(),
-                "ACCOUNT DELETED!"
-        );
-        accountStatusPage.clickContinue();
     }
-
 }
